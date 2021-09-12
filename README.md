@@ -1,0 +1,2 @@
+# wptodeploy
+Wordpress plugin
