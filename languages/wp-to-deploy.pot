@@ -1,0 +1,79 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: WP to Deploy\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-09-10 21:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.5.3; wp-5.8.1\n"
+"X-Domain: wp-to-deploy"
+
+#: pages/dashboard.php:88
+msgid "Amazon S3"
+msgstr ""
+
+#. Author of the plugin
+msgid "Arthur Campos & Thafarel Dias"
+msgstr ""
+
+#: pages/dashboard.php:130
+msgid "AWS Access Key ID"
+msgstr ""
+
+#: pages/dashboard.php:135
+msgid "AWS Secret Access Key"
+msgstr ""
+
+#. Description of the plugin
+#: pages/dashboard.php:64
+msgid "Convert WP to HTML and deploy to AWS or save zip file."
+msgstr ""
+
+#: pages/dashboard.php:33
+msgid "Deploying pages"
+msgstr ""
+
+#: pages/dashboard.php:87
+msgid "General Options"
+msgstr ""
+
+#. URI of the plugin
+#. Author URI of the plugin
+msgid "https://wptodeploy.in/"
+msgstr ""
+
+#: pages/dashboard.php:34
+msgid "Please do not refresh this page."
+msgstr ""
+
+#: pages/dashboard.php:97
+msgid "Project destination URL."
+msgstr ""
+
+#: pages/dashboard.php:125
+msgid "S3 Bucket"
+msgstr ""
+
+#: pages/dashboard.php:140
+msgid "S3 Region"
+msgstr ""
+
+#: pages/dashboard.php:66
+msgid "Settings imported. This is just an example. No data imported."
+msgstr ""
+
+#: pages/dashboard.php:95
+msgid "URL to Deploy"
+msgstr ""
+
+#. Name of the plugin
+msgid "WP to Deploy"
+msgstr ""
