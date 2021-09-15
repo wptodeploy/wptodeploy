@@ -16,38 +16,16 @@ if ( ! class_exists( 'dash_deploy' ) ) :
             global $wpdb;
             $tableName = $wpdb->base_prefix.'deploy_list';
 
-            if(is_admin()){
-                if(isset($_GET['page']) && $_GET['page'] == 'wp-to-deploy'){
-                    add_action( 'admin_enqueue_scripts', function(){
-                        wp_enqueue_script( 'deploy_ajax', WPTODEPLOY_SCRIPTS . 'deploy_ajax.js', array( 'jquery' ));
-                    });
-
-                    add_action( 'admin_enqueue_scripts', function(){
-                        wp_enqueue_style( 'deploy_styles', WPTODEPLOY_STYLES . 'deploy.css');
-                    } );
-
-                    ?>
-                        <div class="deploy_loader">
-                            <div class="content">
-                                <img src="<?php echo WPTODEPLOY_URL.'/assets/images/loader.gif'; ?>" alt="Loader">
-                                <h1><?php echo __('Deploying pages', 'wp-to-deploy') ?></h1>
-                                <p><?php echo __('Please do not refresh this page.', 'wp-to-deploy') ?></p>
-                            </div>
-                        </div>
-                    <?php
-
-                }
-            }
-
             $row = $wpdb->get_results( "SELECT * FROM $tableName");
             $tabela = '';
             if($row){
                 foreach($row as $r){
-                    $tabela .= '<tr>';
+                    $tabela .= '<tr id="'.$r->id.'">';
                     $tabela .= '<td>'.$r->post_url.'</td>';
                     $tabela .= '<td>'.$r->post_dir.'</td>';
                     $tabela .= '<td>'.$r->post_type.'</td>';
                     $tabela .= '<td>'.$r->created_at.'</td>';
+                    $tabela .= '<td><button type="button" id="removeTD" data-id="'.$r->id.'"><i class="icon-sw-off"></i></button></td>';
                     $tabela .= '</tr>';
                 }
             }
@@ -96,7 +74,6 @@ if ( ! class_exists( 'dash_deploy' ) ) :
                             'type' => 'text',
                             'desc' => __( 'Project destination URL.', 'wp-to-deploy' ),
                         ));
-                        /*
                         $xbox->open_mixed_field(array('name' => __( 'Subdirectory', 'wp-to-deploy' )));
                             $xbox->add_field(array(
                                 'name' => __( 'Enable', 'wp-to-deploy' ),
@@ -109,12 +86,12 @@ if ( ! class_exists( 'dash_deploy' ) ) :
                                 'name' =>  __( 'Subdirectory', 'wp-to-deploy' ),
                                 'type' => 'text',
                                 'grid' => '5-of-6',
-                                'desc' => 'Ex. yoursite.com/subdirectory',
+                                'desc' => 'Subdirectory in deploy folder.',
                                 'options' => array(
                                     'show_if' => array('ativa-subdiretorio', '=', 'on')
                                 )
                             ));
-                        $xbox->close_mixed_field();*/
+                        $xbox->close_mixed_field();
                         
                     $xbox->close_tab_item('geral-options');
                     //END GERAL OPTIONS
@@ -218,6 +195,7 @@ if ( ! class_exists( 'dash_deploy' ) ) :
                               <th>Slug</th>
                               <th>PostType</th>
                               <th>Date</th>
+                              <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -228,6 +206,12 @@ if ( ! class_exists( 'dash_deploy' ) ) :
                             <button type="button" class="xbox-form-btn xbox-btn xbox-btn-bluepurple" id="deployBtn"> Deploy List </button>
                         </div>
                                     ',
+                        ));
+                        $section_header_1->add_field( array(
+                            'name' => 'Custom page to deploy',
+                            'id' => 'custom-page',
+                            'type' => 'html',
+                            'content' => '<button type="button" class="xbox-form-btn xbox-btn xbox-btn-green" id="addCustomPage"> Add Custom Page to Deploy </button>',
                         ));
         
                 $xbox->close_tab_item('deplist');
@@ -250,6 +234,61 @@ if ( ! class_exists( 'dash_deploy' ) ) :
         
             $xbox->close_tab('main-tab');
          
+        }
+
+        public static function load_admin_styles(){
+            if(is_admin()){
+                    add_action( 'admin_enqueue_scripts', function(){
+                        wp_enqueue_script( 'deploy_ajax', WPTODEPLOY_SCRIPTS . 'deploy_ajax.js', array( 'jquery' ));
+                    });
+
+                    add_action( 'admin_enqueue_scripts', function(){
+                        wp_enqueue_style( 'deploy_styles', WPTODEPLOY_STYLES . 'deploy.css');
+                    } );
+            }
+        }
+
+        public static function deploy_loader(){
+            ?>
+                        <div class="deploy_loader">
+                            <div class="content">
+                                <img src="<?php echo WPTODEPLOY_URL.'/assets/images/loader.gif'; ?>" alt="Loader">
+                                <h1><?php echo __('Deploying pages', 'wp-to-deploy') ?></h1>
+                                <p><?php echo __('Please do not refresh this page.', 'wp-to-deploy') ?></p>
+                            </div>
+                        </div>
+
+                        <div class="custom_page_deploy">
+                        <div class="loader_dep">
+                                    <img src="<?php echo WPTODEPLOY_URL.'/assets/images/loader.gif'; ?>" alt="Loader">
+                                </div>
+                            <div class="cont">
+                                <button class="closeDep"><i class="icon-sw-off"></i></button>
+                                <div style="text-align:center; margin-bottom: 30px">
+                                <h2>Add new page to deploy</h2>
+                                </div>
+                                <form action="" id="createCustomPage">
+                                    <div class="form-group">
+                                                <input type="text" name="url" placeholder="URL" id="url">
+                                        </div>
+                                    <div class="deploy_submit">
+                                        <button type="submit" class="xbox-form-btn xbox-btn xbox-btn-bluepurple" style="margin-top:0;width: 160px"> Add Page </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    <?php
+        }
+
+        public static function topbar_btn($admin_bar){
+            global $pagenow, $wpdb;
+            if(is_admin()){
+            $tableName = $wpdb->base_prefix.'deploy_list';
+            $row = $wpdb->get_results( "SELECT * FROM $tableName");
+
+            $admin_bar->add_menu( array( 'id'=>'deployBtn','title'=>'Deploy List ('.count($row).')','href'=>'#' ) );
+            }
         }
 
     }

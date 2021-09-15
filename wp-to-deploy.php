@@ -3,7 +3,7 @@
  * Plugin Name: WP to Deploy
  * Plugin URI:  https://wptodeploy.in/
  * Description: Convert WP to HTML and deploy to AWS or save zip file.
- * Version:     0.0.1
+ * Version:     0.0.2
  * Author:      Arthur Campos & Thafarel Dias
  * Author URI:  https://wptodeploy.in/
  * Text Domain: wp-to-deploy
@@ -28,6 +28,7 @@ if ( ! class_exists( 'WpToDeploy' ) ) :
             $this->define_constants();
             $this->includes();
             $this->init_hooks();
+            dash_deploy::load_admin_styles();
         }
 
           /**
@@ -67,6 +68,8 @@ if ( ! class_exists( 'WpToDeploy' ) ) :
 
                 $wpdb->query("TRUNCATE TABLE $tableName");
 
+                list_deploy::delete_directory(WPTODEPLOY_FOLDER);
+
                 echo json_encode( array('success' => true, 'msg' => 'Deploy realizado com sucesso!') );
 
             } else {
@@ -75,6 +78,36 @@ if ( ! class_exists( 'WpToDeploy' ) ) :
 
             exit;
             
+        }
+
+        public static function wptdp_custompage(){
+            $url = $_POST['url'];
+
+            list_deploy::add_page($url);
+
+            echo json_encode( array('success' => true, 'msg' => 'Página adicionada com sucesso!') );
+
+            exit;
+
+        }
+
+        public static function wptdp_removePage(){
+            global $wpdb;
+            $tableName = $wpdb->base_prefix.'deploy_list';
+            $id = $_POST['id'];
+            $row = $wpdb->get_results( "SELECT * FROM $tableName WHERE id LIKE $id");
+
+            if(!empty($row)){
+                $wpdb->delete( $tableName, array( 'id' => $id ) );
+
+                echo json_encode( array('success' => true, 'msg' => 'Deploy realizado com sucesso!') );
+
+            } else {
+                echo json_encode( array('success' => false, 'msg' => 'Nenhum item encontrado.') );
+            }
+
+            exit;
+
         }
 
         public function includes(){
@@ -92,11 +125,21 @@ if ( ! class_exists( 'WpToDeploy' ) ) :
             register_activation_hook(__FILE__, [$this, 'on_activate']);
             register_deactivation_hook(__FILE__, [$this, 'on_deactivate']);
             add_action( 'xbox_init', [dash_deploy::class, 'page_home'] );
+            add_action('admin_bar_menu', [dash_deploy::class, 'topbar_btn'], 100);
+            add_action('admin_footer', [dash_deploy::class, 'deploy_loader']);
             add_action( 'save_post', [list_deploy::class, 'on_update'], 10, 3 );
 
             //AJAX DEPLOY
             add_action('wp_ajax_nopriv_wptdp_deploy', [$this, 'wptdp_deploy']);
             add_action('wp_ajax_wptdp_deploy', [$this, 'wptdp_deploy']);
+
+            //AJAX REMOVE PAGE
+            add_action('wp_ajax_nopriv_wptdp_removePage', [$this, 'wptdp_removePage']);
+            add_action('wp_ajax_wptdp_removePage', [$this, 'wptdp_removePage']);
+
+            //AJAX NEW PAGE
+            add_action('wp_ajax_nopriv_wptdp_custompage', [$this, 'wptdp_custompage']);
+            add_action('wp_ajax_wptdp_custompage', [$this, 'wptdp_custompage']);
 
         }
 
