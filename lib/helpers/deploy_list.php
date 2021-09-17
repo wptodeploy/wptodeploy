@@ -168,7 +168,26 @@ if ( ! class_exists( 'list_deploy' ) ) :
             } else {
                 $deployFolder = '/';
             }
-    
+            
+            
+            $dir = WPTODEPLOY_FOLDER . (WPTODEPLOY_OPTIONS['ativa-subdiretorio'] == 'on' ? '/'.WPTODEPLOY_OPTIONS['subdiretorio'] : '');
+
+            $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+
+            foreach ($rii as $file) {
+                if ($file->isDir()){ 
+                    continue;
+                }
+                
+                $s3->putObjectAcl([
+                    'Bucket' => WPTODEPLOY_OPTIONS['s3_bucket'],
+                    'Key' => explode('static-deploy/', $file->getPathname())[1],
+                    'ACL' => 'public-read'
+                ]);
+ 
+            }
+    		
+            /*
             foreach ($objects as $listResponse) {
                 $items = $listResponse->search("Contents[?starts_with(Key,'".$deployFolder."')]");
                 foreach($items as $item) {
@@ -179,7 +198,7 @@ if ( ! class_exists( 'list_deploy' ) ) :
                     ]);
                 }
             }
-
+			*/
             self::delete_directory(WPTODEPLOY_FOLDER);
 
         }
